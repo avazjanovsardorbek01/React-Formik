@@ -1,4 +1,5 @@
-import React from "react";
+// src/pages/sign-in/index.jsx
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -9,6 +10,7 @@ import {
 } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import ForgotPasswordModal from "../../components/modal"; // Импортируйте модальное окно
 
 const validationSchema = Yup.object({
   email: Yup.string().email("Invalid email address").required("Required"),
@@ -17,7 +19,9 @@ const validationSchema = Yup.object({
     .required("Required"),
 });
 
-const Index = () => {
+const SignIn = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleSignIn = (values, { setSubmitting }) => {
     setTimeout(() => {
       console.log(JSON.stringify(values, null, 2));
@@ -25,8 +29,19 @@ const Index = () => {
     }, 400);
   };
 
+  const handleSendCode = (email) => {
+    // Ваш код для отправки email
+    console.log(`Sending code to ${email}`);
+    // setIsModalOpen(false); // Теперь это не нужно, так как handleClose вызывается в модальном окне
+  };
+
   return (
     <Container maxWidth="sm">
+      <ForgotPasswordModal
+        open={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+        handleSendCode={handleSendCode}
+      />
       <Box
         sx={{
           marginTop: 8,
@@ -101,7 +116,11 @@ const Index = () => {
               <Link href="/sign-up" sx={{ textDecoration: "none" }}>
                 Register
               </Link>
-              <Typography variant="body2" sx={{ mt: 2, textAlign: "center" }}>
+              <Typography
+                variant="body2"
+                sx={{ mt: 2, textAlign: "center", cursor: "pointer" }}
+                onClick={() => setIsModalOpen(true)}
+              >
                 Forgot your password?
               </Typography>
             </Form>
@@ -112,4 +131,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default SignIn;
