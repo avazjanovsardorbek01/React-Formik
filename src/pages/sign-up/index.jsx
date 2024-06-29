@@ -1,139 +1,177 @@
-import React, { useState } from "react";
-import {
-  TextField,
-  Button,
-  Typography,
-  Container,
-  Box,
-  Link,
-} from "@mui/material";
-import { auth } from "@service";
-import CleaningModal from "../../components/modal";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Notification } from "../../utils/index";
+import { auth } from "../../service/";
+import { VerifyModal } from "../../components/modal";
+import { useMask } from "@react-input/mask";
+import { signUpValidationSchema } from "../../utils/validation";
 
 const Index = () => {
-  const [modal, setModal] = useState(false);
-  const [form, setForm] = useState({});
-  const handleChange = (event) => {
-    const { value, name } = event.target;
-    setForm({ ...form, [name]: value });
+  const initialValues = {
+    full_name: "",
+    email: "",
+    password: "",
+    phone_number: "",
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const inputRef = useMask({
+    mask: "+998 (__) ___-__-__",
+    replacement: { _: /\d/ },
+  });
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async (values) => {
     try {
-      const response = await auth.sign_up(form);
+      const phone_number = values.phone_number.replace(/\D/g, "");
+      const payload = { ...values, phone_number: `+${phone_number}` };
+      const response = await auth.sign_up(payload);
       if (response.status === 200) {
-        setModal(true);
-        localStorage.setItem("email", form.email);
+        Notification({
+          title: response.data.message,
+          type: "success",
+        });
+        setOpen(true);
+        setEmail(values.email);
       }
-      console.log(response);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      Notification({
+        title: "Sign Up Failed",
+        type: "error",
+      });
     }
   };
 
+  useEffect(() => {
+    if (localStorage.getItem("access_token")) {
+      navigate("/");
+    }
+  }, []);
+
   return (
     <>
-      {modal && <CleaningModal open={modal} toggle={() => setModal(false)} />}
-      <Container maxWidth="sm">
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: 4,
-            border: "1px solid",
-            borderColor: "grey.300",
-            borderRadius: 2,
-            boxShadow: 1,
-            backgroundColor: "background.paper",
-          }}
-        >
-          <Typography component="h1" variant="h5" sx={{ fontSize: 30, mb: 2 }}>
-            Sign Up
-          </Typography>
-          <Box
-            component="form"
-            id="submit"
+      <VerifyModal
+        open={open}
+        setOpen={setOpen}
+        email={email}
+        closeModal={() => setOpen(false)}
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-5">
+        <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+          <h1 className="text-4xl  text-center mb-6">Register</h1>
+          <Formik
+            initialValues={initialValues}
             onSubmit={handleSubmit}
-            sx={{ width: "100%" }}
+            validationSchema={signUpValidationSchema}
           >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              variant="outlined"
-              type="email"
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="full_name"
-              id="full_name"
-              label="Full Name"
-              type="text"
-              variant="outlined"
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="password"
-              label="Password"
-              variant="outlined"
-              name="password"
-              type="password"
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              type="tel"
-              name="phone_number"
-              id="phone_number"
-              label="Phone Number"
-              placeholder="+998"
-              variant="outlined"
-              onChange={handleChange}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                px: 3,
-                py: 1.5,
-                fontSize: 16,
-                backgroundColor: "#0d47a1",
-                ":hover": {
-                  backgroundColor: "#083b82",
-                },
-              }}
-            >
-              Sign Up
-            </Button>
-            <Link
-              href="/"
-              sx={{
-                textDecoration: "none",
-                // display: "block",
-                textAlign: "center",
-                mt: 2,
-              }}
-            >
-              Sign In
-            </Link>
-          </Box>
-        </Box>
-      </Container>
+            {({ isSubmitting }) => (
+              <Form>
+                <Field
+                  name="full_name"
+                  type="text"
+                  as={TextField}
+                  label="Full Name"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  helperText={
+                    <ErrorMessage
+                      name="full_name"
+                      component="span"
+                      className="text-red-500 text-sm"
+                    />
+                  }
+                />
+                <Field
+                  name="phone_number"
+                  type="tel"
+                  as={TextField}
+                  label="Phone Number"
+                  fullWidth
+                  margin="normal"
+                  inputRef={inputRef}
+                  variant="outlined"
+                  helperText={
+                    <ErrorMessage
+                      name="phone_number"
+                      component="span"
+                      className="text-red-500 text-sm"
+                    />
+                  }
+                />
+                <Field
+                  name="email"
+                  type="email"
+                  as={TextField}
+                  label="Email Address"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  helperText={
+                    <ErrorMessage
+                      name="email"
+                      component="span"
+                      className="text-red-500 text-sm"
+                    />
+                  }
+                />
+                <Field
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  as={TextField}
+                  label="Password"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  helperText={
+                    <ErrorMessage
+                      name="password"
+                      component="span"
+                      className="text-red-500 text-sm"
+                    />
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  disabled={isSubmitting}
+                  className="mb-4"
+                >
+                  {isSubmitting ? "Signing Up..." : "Sign Up"}
+                </Button>
+                <div className="text-center">
+                  <span>Already have an account?</span>
+                  <span
+                    onClick={() => navigate("/sign-in")}
+                    className="ml-2 text-blue-500 cursor-pointer hover:underline"
+                  >
+                    Sign In
+                  </span>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      </div>
     </>
   );
 };

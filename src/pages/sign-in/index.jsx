@@ -1,134 +1,142 @@
-// src/pages/sign-in/index.jsx
-import React, { useState } from "react";
 import {
-  TextField,
   Button,
-  Box,
-  Link,
+  IconButton,
+  InputAdornment,
+  TextField,
   Typography,
-  Container,
 } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import ForgotPasswordModal from "../../components/modal"; // Импортируйте модальное окно
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { auth } from "../../service/index";
+import { Notification } from "../../utils/index";
+import { signInValidationSchema } from "../../utils/validation";
 
-const validationSchema = Yup.object({
-  email: Yup.string().email("Invalid email address").required("Required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Required"),
-});
+const Index = () => {
+  const initialValues = {
+    email: "",
+    password: "",
+  };
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-const SignIn = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleSignIn = (values, { setSubmitting }) => {
-    setTimeout(() => {
-      console.log(JSON.stringify(values, null, 2));
-      setSubmitting(false);
-    }, 400);
+  const handleSubmit = async (values) => {
+    try {
+      const response = await auth.sign_in(values);
+      if (response.status === 200) {
+        navigate("/");
+        localStorage.setItem("access_token", response.data.access_token);
+        Notification({
+          title: "Sign In Successfully",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Notification({
+        title: "Sign In Failed",
+        type: "error",
+      });
+    }
   };
 
-  const handleSendCode = (email) => {
-    // Ваш код для отправки email
-    console.log(`Sending code to ${email}`);
-    // setIsModalOpen(false); // Теперь это не нужно, так как handleClose вызывается в модальном окне
-  };
+  useEffect(() => {
+    if (localStorage.getItem("access_token")) {
+      navigate("/");
+    }
+  }, []);
 
   return (
-    <Container maxWidth="sm">
-      <ForgotPasswordModal
-        open={isModalOpen}
-        handleClose={() => setIsModalOpen(false)}
-        handleSendCode={handleSendCode}
-      />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: 4,
-          border: "1px solid",
-          borderColor: "grey.300",
-          borderRadius: 2,
-          boxShadow: 1,
-          backgroundColor: "background.paper",
-        }}
-      >
-        <Typography component="h1" variant="h5" sx={{ fontSize: 30, mb: 2 }}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-5">
+      <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+        <Typography variant="h4" className="text-center mb-6 font-bold">
           Login
         </Typography>
         <Formik
-          initialValues={{ email: "", password: "" }}
-          validationSchema={validationSchema}
-          onSubmit={handleSignIn}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          validationSchema={signInValidationSchema}
         >
-          {({ isSubmitting, touched, errors }) => (
-            <Form style={{ width: "100%" }}>
+          {({ isSubmitting }) => (
+            <Form>
               <Field
-                as={TextField}
-                type="email"
                 name="email"
-                variant="outlined"
+                type="email"
+                as={TextField}
                 label="Email Address"
                 fullWidth
                 margin="normal"
-                InputProps={{
-                  style: { color: "#909090" },
-                }}
-                error={touched.email && Boolean(errors.email)}
-                helperText={<ErrorMessage name="email" />}
+                variant="outlined"
+                helperText={
+                  <ErrorMessage
+                    name="email"
+                    component="span"
+                    className="text-red-500 text-sm"
+                  />
+                }
               />
               <Field
-                as={TextField}
-                type="password"
                 name="password"
-                variant="outlined"
+                type={showPassword ? "text" : "password"}
+                as={TextField}
                 label="Password"
                 fullWidth
                 margin="normal"
+                variant="outlined"
+                helperText={
+                  <ErrorMessage
+                    name="password"
+                    component="span"
+                    className="text-red-500 text-sm"
+                  />
+                }
                 InputProps={{
-                  style: { color: "#909090" },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
-                error={touched.password && Boolean(errors.password)}
-                helperText={<ErrorMessage name="password" />}
               />
+              <div className="flex justify-between items-center mt-2 mb-4">
+                <span
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-blue-500 cursor-pointer hover:underline"
+                >
+                  Forgot Password?
+                </span>
+              </div>
               <Button
                 type="submit"
-                fullWidth
                 variant="contained"
-                sx={{
-                  mt: 0,
-                  mb: 2,
-                  px: 3,
-                  py: 1.5,
-                  fontSize: 16,
-                  backgroundColor: "#0d47a1",
-                  ":hover": {
-                    backgroundColor: "#083b82",
-                  },
-                }}
+                color="primary"
+                fullWidth
                 disabled={isSubmitting}
+                className="mb-4"
               >
-                Sign In
+                {isSubmitting ? "Signing In..." : "Sign In"}
               </Button>
-              <Link href="/sign-up" sx={{ textDecoration: "none" }}>
-                Register
-              </Link>
-              <Typography
-                variant="body2"
-                sx={{ mt: 2, textAlign: "center", cursor: "pointer" }}
-                onClick={() => setIsModalOpen(true)}
-              >
-                Forgot your password?
-              </Typography>
+              <div className="text-center">
+                <span>Don't have an account?</span>
+                <span
+                  onClick={() => navigate("/sign-up")}
+                  className="ml-2 text-blue-500 cursor-pointer hover:underline"
+                >
+                  Register here
+                </span>
+              </div>
             </Form>
           )}
         </Formik>
-      </Box>
-    </Container>
+      </div>
+    </div>
   );
 };
 
-export default SignIn;
+export default Index;

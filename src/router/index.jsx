@@ -1,22 +1,25 @@
 import {
-    Route,
-    RouterProvider,
-    createBrowserRouter,
-    createRoutesFromElements,
-  } from "react-router-dom";
-  import App from "../App";
-  import {SignIn, SignUp} from '@pages'
-  const Index = () => {
-    const router = createBrowserRouter(
-      createRoutesFromElements(
-        <Route path="/" element={<App />}>
-            <Route index element={<SignIn/>}/>
-            <Route path="sign-up" element={<SignUp/>}/>
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from "react-router-dom";
+import App from "../App";
+import { SignIn, SignUp, Main, Orders, Home, Xizmatlar } from "@pages";
+const Index = () => {
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<App />}>
+        <Route path="/" element={<Main />}>
+          <Route index element={<Home />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/xizmatlar" element={<Xizmatlar />} />
         </Route>
-      )
-    );
-    return <RouterProvider router={router}/>;
-  };
-  
-  export default Index;
-  
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/sign-up" element={<SignUp />} />
+      </Route>
+    )
+  );
+  return <RouterProvider router={router} />;
+};
+export default Index;
