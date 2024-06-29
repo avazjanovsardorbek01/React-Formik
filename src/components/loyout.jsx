@@ -51,7 +51,9 @@ function ResponsiveDrawer(props) {
           <NavLink
             to={item.path}
             key={index}
-            className={item.path === pathname ? "block bg-blue-500 text-white" : ""}
+            className={
+              item.path === pathname ? "block bg-blue-500 text-white" : ""
+            }
           >
             <ListItem disablePadding>
               <ListItemButton>
