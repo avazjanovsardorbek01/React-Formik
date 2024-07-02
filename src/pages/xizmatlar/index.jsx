@@ -57,7 +57,6 @@ const ActionButton = styled(Button)({
   margin: "0 5px",
 });
 
-// Initial services data (replace with API integration)
 let initialServices = [
   { id: 1, name: "Service 1", price: "$100" },
   { id: 2, name: "Service 2", price: "$200" },
@@ -68,7 +67,7 @@ let initialServices = [
   { id: 7, name: "Service 7", price: "$700" },
   { id: 8, name: "Service 8", price: "$800" },
   { id: 9, name: "Service 9", price: "$900" },
-  { id: 10, name: "Service 10", price: "$1000" },
+  { id: 10, name: "Service 10", price: "$1100" },
 ];
 
 const Xizmatlar = () => {
@@ -76,7 +75,7 @@ const Xizmatlar = () => {
   const [newServiceName, setNewServiceName] = useState("");
   const [newServicePrice, setNewServicePrice] = useState("");
   const [editingServiceId, setEditingServiceId] = useState(null);
-  const [services, setServices] = useState(initialServices); // State for services
+  const [services, setServices] = useState(initialServices);
 
   const handleAddClick = () => {
     setOpenModal(true);
@@ -90,7 +89,6 @@ const Xizmatlar = () => {
   };
 
   const handleAddService = () => {
-    // Logic to add the new service to your services array or API
     const newService = {
       id: services.length + 1,
       name: newServiceName,
@@ -99,14 +97,12 @@ const Xizmatlar = () => {
 
     setServices([...services, newService]);
 
-    // After adding, close the modal
     handleModalClose();
   };
 
   const handleEditClick = (id) => {
     setEditingServiceId(id);
     setOpenModal(true);
-    // Optionally, prefill the modal fields with existing data
     const serviceToEdit = services.find((service) => service.id === id);
     if (serviceToEdit) {
       setNewServiceName(serviceToEdit.name);
@@ -115,20 +111,16 @@ const Xizmatlar = () => {
   };
 
   const handleEditService = () => {
-    // Logic to edit the service in your services array or API
     const updatedServices = services.map((service) =>
       service.id === editingServiceId
         ? { ...service, name: newServiceName, price: newServicePrice }
         : service
     );
     setServices(updatedServices);
-
-    // After editing, close the modal
     handleModalClose();
   };
 
   const handleDeleteClick = (id) => {
-    // Logic to delete the service from your services array or API
     const updatedServices = services.filter((service) => service.id !== id);
     setServices(updatedServices);
   };
@@ -183,7 +175,6 @@ const Xizmatlar = () => {
         </StyledTable>
       </TableContainer>
 
-      {/* Modal for adding or editing a service */}
       <Modal
         open={openModal}
         onClose={handleModalClose}
