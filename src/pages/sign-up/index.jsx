@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Notification } from "../../utils/index";
-import { auth } from "../../service/";
+import { auth } from "../../service/service";
 import { VerifyModal } from "../../components/modal";
 import { useMask } from "@react-input/mask";
 import { signUpValidationSchema } from "../../utils/validation";

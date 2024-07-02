@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { useNavigate } from "react-router-dom";
 import { Button, TextField } from "@mui/material";
-import { auth } from "../../../service";
+import { auth } from "../../../service/service";
 import Notification from "../../../utils/notification";
 
 const style = {

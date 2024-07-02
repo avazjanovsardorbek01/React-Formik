@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { auth } from "../../service/index";
+import { auth } from "../../service/service";
 import { Notification } from "../../utils/index";
 import { signInValidationSchema } from "../../utils/validation";
 
