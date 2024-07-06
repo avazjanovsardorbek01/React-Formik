@@ -17,6 +17,7 @@ import { NavLink } from "react-router-dom";
 import { Button, ListItemText } from "@mui/material";
 import { LogOutModal } from "@modal";
 import routes from "../router/routes";
+import Logo from "../assets/Logo.svg"
 
 const drawerWidth = 240;
 
@@ -44,16 +45,14 @@ function ResponsiveDrawer(props) {
 
   const drawer = (
     <div>
-      <Toolbar />
+      <Toolbar> <img src={Logo} alt="logo" className="w-[144px]" /></Toolbar>
       <Divider />
       <List>
         {routes.map((item, index) => (
           <NavLink
             to={item.path}
             key={index}
-            className={
-              item.path === pathname ? "block bg-blue-500 text-white" : ""
-            }
+            className={item.path === pathname ? "block bg-blue-500 text-white" : ""}
           >
             <ListItem disablePadding>
               <ListItemButton>
@@ -105,6 +104,7 @@ function ResponsiveDrawer(props) {
             </Typography>
             <LogOutModal />
           </ListItem>
+          
         </Toolbar>
       </AppBar>
       <Box

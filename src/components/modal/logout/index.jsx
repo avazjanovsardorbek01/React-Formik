@@ -48,11 +48,11 @@ export default function BasicModal() {
         <Box sx={style}>
           <div style={{display: "flex", justifyContent: "space-between"}}>
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              Haqiqatdan chiqishni xohlaysizmi?
+              Do you want to exit?
             </Typography>
             <div style={{display: "flex", gap: "12px", marginTop: "64px"}}>
-              <Button onClick={handleClose}>Yo'q</Button>
-              <Button onClick={logOut} variant="contained">Ha</Button>
+              <Button onClick={handleClose}>No</Button>
+              <Button onClick={logOut} variant="contained">Yes</Button>
             </div>
           </div>
         </Box>

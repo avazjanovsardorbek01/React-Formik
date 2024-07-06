@@ -1,15 +1,21 @@
-import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Notification } from "../../utils/index";
-import { auth } from "../../service/service";
+import { auth } from "../../service/";
 import { VerifyModal } from "../../components/modal";
 import { useMask } from "@react-input/mask";
 import { signUpValidationSchema } from "../../utils/validation";
 
-const Index = () => {
+const SignUp = () => {
   const initialValues = {
     full_name: "",
     email: "",
@@ -61,9 +67,14 @@ const Index = () => {
         email={email}
         closeModal={() => setOpen(false)}
       />
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-5">
+      <div className="min-h-screen flex flex-col items-center justify-center p-5 bg-gray-100">
         <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-          <h1 className="text-4xl  text-center mb-6">Register</h1>
+          <Typography
+            variant="h4"
+            className="text-center mb-6 font-bold text-blue-600"
+          >
+            Register
+          </Typography>
           <Formik
             initialValues={initialValues}
             onSubmit={handleSubmit}
@@ -83,7 +94,7 @@ const Index = () => {
                     <ErrorMessage
                       name="full_name"
                       component="span"
-                      className="text-red-500 text-sm"
+                      className="text-red-600 text-sm"
                     />
                   }
                 />
@@ -100,7 +111,7 @@ const Index = () => {
                     <ErrorMessage
                       name="phone_number"
                       component="span"
-                      className="text-red-500 text-sm"
+                      className="text-red-600 text-sm"
                     />
                   }
                 />
@@ -116,7 +127,7 @@ const Index = () => {
                     <ErrorMessage
                       name="email"
                       component="span"
-                      className="text-red-500 text-sm"
+                      className="text-red-600 text-sm"
                     />
                   }
                 />
@@ -132,7 +143,7 @@ const Index = () => {
                     <ErrorMessage
                       name="password"
                       component="span"
-                      className="text-red-500 text-sm"
+                      className="text-red-600 text-sm"
                     />
                   }
                   InputProps={{
@@ -154,19 +165,16 @@ const Index = () => {
                   color="primary"
                   fullWidth
                   disabled={isSubmitting}
-                  className="mb-4"
+                  sx={{ marginBottom: "16px", padding: "10px 0" }}
                 >
                   {isSubmitting ? "Signing Up..." : "Sign Up"}
                 </Button>
-                <div className="text-center">
-                  <span>Already have an account?</span>
-                  <span
-                    onClick={() => navigate("/sign-in")}
-                    className="ml-2 text-blue-500 cursor-pointer hover:underline"
-                  >
-                    Sign In
-                  </span>
-                </div>
+                <Typography
+                  onClick={() => navigate("/sign-in")}
+                  className="text-blue-600 cursor-pointer hover:text-blue-800 text-center"
+                >
+                  Already have an account? Sign In
+                </Typography>
               </Form>
             )}
           </Formik>
@@ -176,4 +184,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default SignUp;
