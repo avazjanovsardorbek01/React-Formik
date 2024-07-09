@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -9,7 +8,12 @@ export default defineConfig({
       { find: "@", replacement: "/src/*" },
       { find: "@pages", replacement: "/src/pages/index.jsx" },
       { find: "@service", replacement: "/src/service/index.js" },
-      { find: "@modal", replacement: "/src/components/modal/index.jsx" },
+      { find: "@modal", replacement: "/src/components/modal" },
+      { find: "@validation", replacement: "/src/components/utils/validation.jsx" },
+      { find: "@global-interface", replacement: "/src/interfaces/global.ts" },
+      { find: "@service", replacement: "/src/service" },
+      { find: "@router", replacement: "/src/router" },
+      { find: "@pages", replacement: "/src/pages" },
     ],
   },
 })

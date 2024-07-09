@@ -3,7 +3,6 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -13,9 +12,9 @@ import { Notification } from "../../utils/index";
 import { auth } from "../../service/";
 import { VerifyModal } from "../../components/modal";
 import { useMask } from "@react-input/mask";
-import { signUpValidationSchema } from "../../utils/validation";
+import {signUpValidationSchema} from "../../utils/validation"
 
-const SignUp = () => {
+const Index = () => {
   const initialValues = {
     full_name: "",
     email: "",
@@ -30,12 +29,12 @@ const SignUp = () => {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const handleSubmit = async (values) => {
     try {
       const phone_number = values.phone_number.replace(/\D/g, "");
       const payload = { ...values, phone_number: `+${phone_number}` };
       const response = await auth.sign_up(payload);
+      response.status === 200 && setOpen(true);
       if (response.status === 200) {
         Notification({
           title: response.data.message,
@@ -52,7 +51,6 @@ const SignUp = () => {
       });
     }
   };
-
   useEffect(() => {
     if (localStorage.getItem("access_token")) {
       navigate("/");
@@ -67,19 +65,12 @@ const SignUp = () => {
         email={email}
         closeModal={() => setOpen(false)}
       />
-      <div className="min-h-screen flex flex-col items-center justify-center p-5 bg-gray-100">
-        <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-          <Typography
-            variant="h4"
-            className="text-center mb-6 font-bold text-blue-600"
-          >
-            Register
-          </Typography>
-          <Formik
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            validationSchema={signUpValidationSchema}
-          >
+      <div className="h-screen flex-col flex items-center justify-center gap-5 p-5">
+        <h1 className="text-[35px] font-normal sm:text-[36px] md:text-[56px]">
+          Register
+        </h1>
+        <div className="max-w-[600px]">
+          <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={signUpValidationSchema}>
             {({ isSubmitting }) => (
               <Form>
                 <Field
@@ -94,7 +85,7 @@ const SignUp = () => {
                     <ErrorMessage
                       name="full_name"
                       component="span"
-                      className="text-red-600 text-sm"
+                      className="text-[red] text-[15px]"
                     />
                   }
                 />
@@ -102,7 +93,7 @@ const SignUp = () => {
                   name="phone_number"
                   type="tel"
                   as={TextField}
-                  label="Phone Number"
+                  label="Phone number"
                   fullWidth
                   margin="normal"
                   inputRef={inputRef}
@@ -111,7 +102,7 @@ const SignUp = () => {
                     <ErrorMessage
                       name="phone_number"
                       component="span"
-                      className="text-red-600 text-sm"
+                      className="text-[red] text-[15px]"
                     />
                   }
                 />
@@ -119,7 +110,7 @@ const SignUp = () => {
                   name="email"
                   type="email"
                   as={TextField}
-                  label="Email Address"
+                  label="Email address"
                   fullWidth
                   margin="normal"
                   variant="outlined"
@@ -127,7 +118,7 @@ const SignUp = () => {
                     <ErrorMessage
                       name="email"
                       component="span"
-                      className="text-red-600 text-sm"
+                      className="text-[red] text-[15px]"
                     />
                   }
                 />
@@ -143,7 +134,7 @@ const SignUp = () => {
                     <ErrorMessage
                       name="password"
                       component="span"
-                      className="text-red-600 text-sm"
+                      className="text-[red] text-[15px]"
                     />
                   }
                   InputProps={{
@@ -165,16 +156,16 @@ const SignUp = () => {
                   color="primary"
                   fullWidth
                   disabled={isSubmitting}
-                  sx={{ marginBottom: "16px", padding: "10px 0" }}
+                  sx={{ marginBottom: "8px" }}
                 >
-                  {isSubmitting ? "Signing Up..." : "Sign Up"}
+                  {isSubmitting ? "Yuborilmoqda..." : "Sign Up"}
                 </Button>
-                <Typography
+                <span
                   onClick={() => navigate("/sign-in")}
-                  className="text-blue-600 cursor-pointer hover:text-blue-800 text-center"
+                  className=" text-blue-300 cursor-pointer hover:text-blue-500"
                 >
-                  Already have an account? Sign In
-                </Typography>
+                  Already have an account?
+                </span>
               </Form>
             )}
           </Formik>
@@ -184,4 +175,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Index;

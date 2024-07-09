@@ -4,9 +4,8 @@ import Modal from "@mui/material/Modal";
 import { Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { ServiceValidationSchema } from "../../../utils/validation";
-import service from "../../../service/service";
-
+import { ServiceValidationSchema } from "../../utils/validation";
+import service from "../../service/service";
 
 const style = {
   position: "absolute",
@@ -31,16 +30,13 @@ export default function AddService() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const handleSubmit = async (values) => {
-    if (item) {
-      const payload = {id: item.id, ...values}
-    }
     try {
-      const responce = await service.update(values);
-      if(responce.status === 201){
-        window.location.reload()
+      const response = await service.add(values); 
+      if (response.status === 201) {
+        window.location.reload();
       }
-      
     } catch (err) {
       console.error(err);
     }
@@ -113,7 +109,7 @@ export default function AddService() {
                       onClick={handleClose}
                       type="button"
                       variant="contained"
-                      color="warning"
+                      color="primary"
                     >
                       Close
                     </Button>

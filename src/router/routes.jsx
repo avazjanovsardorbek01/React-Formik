@@ -1,21 +1,21 @@
-import LocalPostOfficeIcon from '@mui/icons-material/LocalPostOffice';
-import HomeIcon from '@mui/icons-material/Home';
-import BorderStyleIcon from '@mui/icons-material/BorderStyle';
+import AddchartIcon from '@mui/icons-material/Addchart';
+import DryCleaningIcon from '@mui/icons-material/DryCleaning';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 const routes = [
     {
         path: "/",
         content: "Asosiy",
-        icon: <HomeIcon/>
-    },
-    {
-        path: "/service",
-        content: "Xizmatlar",
-        icon: <LocalPostOfficeIcon/>
+        icon: <AddchartIcon/>
     },
     {
         path: "/orders",
         content: "Buyurtmalar",
-        icon: <BorderStyleIcon/>
+        icon: <DryCleaningIcon/>
+    },
+    {
+        path: "/xizmatlar",
+        content: "Xizmatlar",
+        icon: <MiscellaneousServicesIcon/>
     },
 ]
 

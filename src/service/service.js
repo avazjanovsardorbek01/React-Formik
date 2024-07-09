@@ -1,29 +1,10 @@
-// import http from "./config";
-
-// const service = {
-//   get: () => http.get("/service/all", { params: { page: 1, limit: 10 } }),
-//   add: (data) => http.post("/service", data),
-//   edit: (data, id) => http.put(`/service/${id}`, data),
-//   delete: (id) => http.delete("/service", {params: {id}}),
-// };
-
-// export default service
-// const order = {
-//   get: () => http.get("/service/all", { params: { page: 1, limit: 10 } }),
-//   add: (data) => http.post("/service", data),
-//   edit: (data, id) => http.put(`/service/${id}`, data),
-//   delete: (id) => http.delete("/service", {params: {id}}),
-// };
-
-// export default order;
-
-
 import http from "./config";
 
 const service = {
   get: () => http.get("/service/all", { params: { page: 1, limit: 10 } }),
   add: (data) => http.post("/service", data),
-  edit: (data, id) => http.put(`/service/${id}`, data),
-  delete: (id) => http.delete("/service", { params: { id } }),
+  update: (data) => http.put("/service", data),
+  delete: (id) => http.delete("/service", {params: {id}}),
 };
+
 export default service;

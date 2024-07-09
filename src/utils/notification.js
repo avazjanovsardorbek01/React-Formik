@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 const Notification = (props) => {
   return toast(props.title, {
     position: "top-right",
-    autoClose: 1500,
+    autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
