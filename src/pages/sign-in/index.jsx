@@ -4,6 +4,9 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  Container,
+  Box,
+  Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -11,7 +14,7 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { auth } from "../../service/index";
 import { Notification } from "../../utils/index";
-import {signInValidationSchema} from "../../utils/validation"
+import { signInValidationSchema } from "../../utils/validation";
 
 const Index = () => {
   const initialValues = {
@@ -19,14 +22,12 @@ const Index = () => {
     password: "",
   };
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (values) => {
     try {
       const response = await auth.sign_in(values);
       if (response.status === 200) {
-          navigate("/");
+        navigate("/");
         localStorage.setItem("access_token", response.data.access_token);
         Notification({
           title: "Sign In Successfuly",
@@ -38,7 +39,7 @@ const Index = () => {
       Notification({
         title: "Sign In Failed",
         type: "error",
-      })
+      });
     }
   };
   useEffect(() => {
@@ -48,13 +49,23 @@ const Index = () => {
   }, []);
 
   return (
-    <>
-      <div className="h-screen flex-col flex items-center justify-center p-5">
-        <h1 className="text-[40px] font-bold sm:text-[36px] md:text-[56px]">
-          Login
-        </h1>
-        <div className="max-w-[600px]">
-          <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={signInValidationSchema}>
+    <Container component="main" maxWidth="xs">
+      <Paper elevation={12} sx={{ padding: 3, mt: 15, borderRadius: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography component="h1" variant="h4" gutterBottom>
+            Login
+          </Typography>
+          <Formik
+            initialValues={initialValues}
+            onSubmit={handleSubmit}
+            validationSchema={signInValidationSchema}
+          >
             {({ isSubmitting }) => (
               <Form>
                 <Field
@@ -101,36 +112,57 @@ const Index = () => {
                     ),
                   }}
                 />
-                <span
-                  // onClick={() => navigate("/forgot-password")}
-                  className=" text-blue-300 cursor-pointer hover:text-blue-500"
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mt: 2,
+                  }}
                 >
-                Forgot Password?
-                </span>
+                  <Typography
+                    variant="body2"
+                    className=" text-blue-300 cursor-pointer hover:text-blue-500"
+                  >
+                    Forgot Password?
+                  </Typography>
+                </Box>
                 <Button
                   type="submit"
                   variant="contained"
                   color="primary"
                   fullWidth
                   disabled={isSubmitting}
-                  sx={{ marginBottom: "8px", marginTop: "8px" }}
+                  sx={{ marginBottom: "8px", marginTop: "16px" }}
                 >
-                  {isSubmitting ? "Signing" : "Sign In"}
+                  {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
-                <span>Don't have an account?</span>
-                <span
-                  onClick={() => navigate("/sign-up")}
-                  className="ml-2 cursor-pointer text-blue-500"
-                  
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mt: 2,
+                  }}
                 >
-                   Register here
-                </span>
+                  <Typography variant="body2">
+                    Don't have an account?
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    onClick={() => navigate("/sign-up")}
+                    className="ml-2 cursor-pointer text-blue-500"
+                    sx={{ ml: 1, cursor: "pointer", color: "blue" }}
+                  >
+                    Register here
+                  </Typography>
+                </Box>
               </Form>
             )}
           </Formik>
-        </div>
-      </div>
-    </>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
