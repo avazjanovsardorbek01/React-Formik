@@ -1,208 +1,202 @@
-import React, { useState, useEffect } from "react";
+import { TextField } from "@mui/material";
+import React, { useState } from "react";
+import { auth } from "../../service";
+import VerifyCodeModal from "../../components/modals/sign-in/VerifyCodeModal";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { Formik, Field, Form, ErrorMessage } from "formik";
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  TextField,
-  Typography,
-  Box,
-  Grid,
-} from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useMask } from "@react-input/mask";
-import { Notification } from "../../utils/index";
-import { auth } from "../../service/index";
-import { VerifyModal } from "../../components/modal";
-import { signUpValidationSchema } from "../../utils/validation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
 
 const Index = () => {
-  const initialValues = {
-    full_name: "",
-    email: "",
-    password: "",
-    phone_number: "",
-  };
+  const [showPassword, setShowPassword] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
+  const navigate = useNavigate();
 
-  const inputRef = useMask({
-    mask: "+998 (__) ___-__-__",
-    replacement: { _: /\d/ },
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email ni kiriting!"),
+    full_name: Yup.string().required("Username ni kiriting!"),
+    password: Yup.string()
+      .min(6, "Parol kamida 6 ta harf va raqamdan tashkil topishi kerak!")
+      .matches(/[A-Z]/, "Parolda katta harf ham qatnashishi kerak!")
+      .matches(/\d/, "Kamida bitta raqam ham bo'lishi shart!")
+      .required("Parolni kiriting"),
+    phone_number: Yup.string()
+      .matches(
+        /^(\+998)?\d{9}$/,
+        "Faqat O'zbekiston raqamlari ro'yxatdan o'ta oladi!"
+      )
+      .required("Telefon raqam kiriting!"),
   });
 
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
-  const handleSubmit = async (values) => {
+  const toggleModal = () => {
+    setModalOpen(!modalOpen);
+  };
+
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const phone_number = values.phone_number.replace(/\D/g, "");
-      const payload = { ...values, phone_number: `+${phone_number}` };
-      const response = await auth.sign_up(payload);
+      const response = await auth.sign_up(values);
       if (response.status === 200) {
-        Notification({
-          title: response.data.message,
-          type: "success",
-        });
-        setOpen(true);
-        setEmail(values.email);
+        setModalOpen(true);
+        toast.info("Email ga kod yuborildi!", {});
+        localStorage.setItem("email", values.email);
+        localStorage.setItem("username", values.full_name);
+        localStorage.setItem("phone_number", values.phone_number);
+        localStorage.setItem("password", values.password);
+      } else if (response.status === 400) {
+        const data = await response.json();
+        alert(data.error);
+        toast.error("Nimadir xato ketdi!", {});
+        console.log(data.error);
+      } else {
+        console.log("Signup failed");
+        toast.error("Nimadir xato ketdi!", {});
       }
     } catch (error) {
-      console.error(error);
-      Notification({
-        title: "Sign Up Failed",
-        type: "error",
-      });
+      console.log("Error during signup:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    if (localStorage.getItem("access_token")) {
-      navigate("/");
-    }
-  }, [navigate]);
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const moveRegister = () => {
+    navigate("/");
+  };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        backgroundColor: "#f0f2f5",
-      }}
-    >
-      <VerifyModal
-        open={open}
-        setOpen={setOpen}
-        email={email}
-        closeModal={() => setOpen(false)}
-      />
-      <Typography variant="h1" sx={{ fontSize: "2.5rem", mb: 2, color: "#33" }}>
-        Register
-      </Typography>
-      <Box
-        sx={{
-          maxWidth: "500px",
-          width: "100%",
-          background: "#fff",
-          padding: "30px",
-          borderRadius: "10px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <Formik
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          validationSchema={signUpValidationSchema}
-        >
-          {({ isSubmitting }) => (
-            <Form>
-              <Field
-                name="full_name"
-                type="text"
-                as={TextField}
-                label="Full Name"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                helperText={
-                  <ErrorMessage
-                    name="full_name"
-                    component="span"
-                    style={{ color: "red", fontSize: "0.875rem" }}
-                  />
-                }
-              />
-              <Field
-                name="phone_number"
-                type="tel"
-                as={TextField}
-                label="Phone number"
-                fullWidth
-                margin="normal"
-                inputRef={inputRef}
-                variant="outlined"
-                helperText={
-                  <ErrorMessage
-                    name="phone_number"
-                    component="span"
-                    style={{ color: "red", fontSize: "0.875rem" }}
-                  />
-                }
-              />
-              <Field
-                name="email"
-                type="email"
-                as={TextField}
-                label="Email address"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                helperText={
-                  <ErrorMessage
-                    name="email"
-                    component="span"
-                    style={{ color: "red", fontSize: "0.875rem" }}
-                  />
-                }
-              />
-              <Field
-                name="password"
-                type={showPassword ? "text" : "password"}
-                as={TextField}
-                label="Password"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                helperText={
-                  <ErrorMessage
+    <div className="flex h-screen w-full justify-center items-center bg-gray-100">
+      <div className="flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg">
+        <VerifyCodeModal isOpen={modalOpen} toggle={toggleModal} />
+        <div className="card mb-4">
+          <h1 className="text-2xl border-none font-bold text-center text-gray-800">
+            Sign-Up
+          </h1>
+        </div>
+        <div className="login_body w-full">
+          <Formik
+            initialValues={{
+              email: "",
+              full_name: "",
+              password: "",
+              phone_number: "",
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({
+              values,
+              handleChange,
+              handleBlur,
+              errors,
+              touched,
+              isSubmitting,
+            }) => (
+              <Form className="space-y-2 md:space-y-4" id="submit">
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.email}
+                  type="text"
+                  id="email"
+                  className="my-2"
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={touched.email && errors.email}
+                />
+                <TextField
+                  fullWidth
+                  label="Fullname"
+                  name="full_name"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.full_name}
+                  type="text"
+                  id="full_name"
+                  className="my-2"
+                  error={touched.full_name && Boolean(errors.full_name)}
+                  helperText={touched.full_name && errors.full_name}
+                />
+                <div className="my-2">
+                  <TextField
+                    fullWidth
+                    label="Password"
                     name="password"
-                    component="span"
-                    style={{ color: "red", fontSize: "0.875rem" }}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.password}
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    error={touched.password && Boolean(errors.password)}
+                    helperText={touched.password && errors.password}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                          >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                }
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                disabled={isSubmitting}
-                sx={{ margin: "15px 0" }}
-              >
-                {isSubmitting ? "Signing Up..." : "Sign Up"}
-              </Button>
-              <Typography variant="body1" align="center">
-                Already have an account?
-                <Typography
-                  component="span"
-                  onClick={() => navigate("/sign-in")}
-                  sx={{ color: "#007bff", cursor: "pointer", ml: 1 }}
-                >
-                  Sign In
-                </Typography>
-              </Typography>
-            </Form>
-          )}
-        </Formik>
-      </Box>
-    </Box>
+                </div>
+                <div className="my-2">
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    name="phone_number"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.phone_number}
+                    type="text"
+                    id="phone_number"
+                    error={touched.phone_number && Boolean(errors.phone_number)}
+                    helperText={touched.phone_number && errors.phone_number}
+                    className="mt-2"
+                  />
+                </div>
+                <div className="flex flex-col justify-center gap-3">
+                  <a
+                    onClick={moveRegister}
+                    href="#"
+                    className="text-blue-500 hover:underline text-center w-1/4 mx-auto"
+                  >
+                    Login
+                  </a>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                    disabled={isSubmitting}
+                  >
+                    SignUp
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      </div>
+    </div>
   );
 };
 

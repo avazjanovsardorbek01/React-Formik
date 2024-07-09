@@ -1,19 +1,18 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
       { find: "@", replacement: "/src/*" },
+      { find: "@routes", replacement: "/src/router/routes.jsx" },
       { find: "@pages", replacement: "/src/pages/index.jsx" },
+      { find: "@validation", replacement: "/src/utils/index.js" },
       { find: "@service", replacement: "/src/service/index.js" },
-      { find: "@modal", replacement: "/src/components/modal" },
-      { find: "@validation", replacement: "/src/components/utils/validation.jsx" },
-      { find: "@global-interface", replacement: "/src/interfaces/global.ts" },
-      { find: "@service", replacement: "/src/service" },
-      { find: "@router", replacement: "/src/router" },
-      { find: "@pages", replacement: "/src/pages" },
+      { find: "@modal", replacement: "/src/components/modals/index.jsx" },
+      { find: "@ui", replacement: "/src/components/ui/index.jsx" },
     ],
   },
-})
+});

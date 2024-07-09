@@ -1,168 +1,327 @@
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  TextField,
-  Typography,
-  Container,
-  Box,
-  Paper,
-} from "@mui/material";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { auth } from "../../service/index";
-import { Notification } from "../../utils/index";
-import { signInValidationSchema } from "../../utils/validation";
+import { auth } from "../../service";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+} from "@mui/material";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
 
 const Index = () => {
-  const initialValues = {
-    email: "",
-    password: "",
-  };
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const handleSubmit = async (values) => {
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [emailForPasswordReset, setEmailForPasswordReset] = useState("");
+  const navigate = useNavigate();
+
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email("Email topilmadi!")
+      .required("Email ni kiriting!"),
+    password: Yup.string()
+      .min(6, "Parol kamida 6 ta harf va raqamdan tashkil topishi kerak!")
+      .matches(/[A-Z]/, "Parolda katta harf ham qatnashishi kerak!")
+      .matches(/\d/, "Kamida bitta raqam ham bo'lishi shart!")
+      .required("Parolni kiriting"),
+  });
+
+  const moveRegister = () => {
+    navigate("/sign-up");
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const response = await auth.sign_in(values);
+      console.log("Response: ", response);
+
       if (response.status === 200) {
-        navigate("/");
-        localStorage.setItem("access_token", response.data.access_token);
-        Notification({
-          title: "Sign In Successfuly",
-          type: "success",
-        });
+        toast.success("Succesfully!");
+        localStorage.setItem("access_token", response?.data?.access_token);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        toast.error("Login failed. Please try again.");
       }
     } catch (error) {
-      console.error(error);
-      Notification({
-        title: "Sign In Failed",
-        type: "error",
-      });
+      console.error("Error during login: ", error);
+      toast.error("Parol yoki Email xato kiritildi!");
+    } finally {
+      setSubmitting(false);
     }
   };
-  useEffect(() => {
-    if (localStorage.getItem("access_token")) {
-      navigate("/");
+
+  const handleForgotPasswordSubmit = async () => {
+    try {
+      const response = await auth.forgot_password({
+        email: emailForPasswordReset,
+      });
+      if (response.status === 200) {
+        setForgotPasswordModalOpen(false);
+        setVerifyModalOpen(true);
+        toast.success("Kod yuborildi!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Email topilmadi!");
     }
-  }, []);
+  };
+
+  const handleVerifySubmit = async (values, { setSubmitting }) => {
+    const email = localStorage.getItem("email");
+
+    if (!email) {
+      toast.error("Email not found in localStorage");
+      setSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      code: values.code,
+      email: email,
+      new_password: values.password,
+    };
+
+    try {
+      const response = await auth.verify_forgot_password(payload);
+      if (response.status === 201) {
+        setVerifyModalOpen(false);
+        toast.success("Parol muvaffaqiyatli yangilandi!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Kod yoki parol noto'g'ri!");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Paper elevation={12} sx={{ padding: 3, mt: 15, borderRadius: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
+    <div className="flex h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold text-center text-gray-800">
+          Sign-In
+        </h1>
+        <Formik
+          initialValues={{ email: "", password: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
         >
-          <Typography component="h1" variant="h4" gutterBottom>
-            Login
-          </Typography>
-          <Formik
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            validationSchema={signInValidationSchema}
-          >
-            {({ isSubmitting }) => (
-              <Form>
-                <Field
-                  name="email"
-                  type="email"
-                  as={TextField}
-                  label="Email address"
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
+            <Form id="submit" className="mt-6 space-y-4">
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.email}
+                type="text"
+                id="email"
+                className="my-2"
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+              />
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.password}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                error={touched.password && Boolean(errors.password)}
+                helperText={touched.password && errors.password}
+              />
+              <div className="text-center flex">
+                <a
+                  onClick={moveRegister}
+                  href="#"
+                  className="text-blue-500 no-underline hover:underline"
+                >
+                  Sign Up
+                </a>
+              </div>
+              <div>
+                <a href="#" onClick={() => setForgotPasswordModalOpen(true)}>
+                  Forgot pasword
+                </a>
+              </div>
+              <div className="mt-2 text-center">
+                <Button
+                  type="submit"
                   fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  helperText={
-                    <ErrorMessage
-                      name="email"
-                      component="span"
-                      className="text-[red] text-[15px]"
-                    />
-                  }
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                >
+                  Sign In
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+      </div>
+      <Dialog
+        open={forgotPasswordModalOpen}
+        onClose={() => setForgotPasswordModalOpen(false)}
+      >
+        <DialogTitle>Forgot Password</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email"
+            type="text"
+            name="email"
+            fullWidth
+            value={emailForPasswordReset}
+            onChange={(e) => setEmailForPasswordReset(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setForgotPasswordModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleForgotPasswordSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={verifyModalOpen} onClose={() => setVerifyModalOpen(false)}>
+        <DialogTitle>Verify Code & Reset Password</DialogTitle>
+        <Formik
+          initialValues={{
+            code: "",
+            password: "",
+          }}
+          validationSchema={Yup.object({
+            code: Yup.string().required("Kod kiriting!"),
+            password: Yup.string()
+              .min(
+                6,
+                "Parol kamida 6 ta harf va raqamdan tashkil topishi kerak!"
+              )
+              .matches(/[A-Z]/, "Parolda katta harf ham qatnashishi kerak!")
+              .matches(/\d/, "Kamida bitta raqam ham bo'lishi shart!")
+              .required("Yangi parolni kiriting!"),
+          })}
+          onSubmit={handleVerifySubmit}
+        >
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
+            <Form className="mt-6 space-y-4">
+              <DialogContent>
+                <TextField
+                  fullWidth
+                  label="Kod"
+                  name="code"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.code}
+                  type="text"
+                  id="code"
+                  className="my-2"
+                  error={touched.code && Boolean(errors.code)}
+                  helperText={touched.code && errors.code}
                 />
-                <Field
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  as={TextField}
-                  label="Password"
+                <TextField
                   fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  helperText={
-                    <ErrorMessage
-                      name="password"
-                      component="span"
-                      className="text-[red] text-[15px]"
-                    />
-                  }
+                  label="Yangi Parol"
+                  name="password"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.password}
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  required
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
                         >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password}
                 />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mt: 2,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    className=" text-blue-300 cursor-pointer hover:text-blue-500"
-                  >
-                    Forgot Password?
-                  </Typography>
-                </Box>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  disabled={isSubmitting}
-                  sx={{ marginBottom: "8px", marginTop: "16px" }}
-                >
-                  {isSubmitting ? "Signing in..." : "Sign In"}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setVerifyModalOpen(false)}>
+                  Bekor qilish
                 </Button>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    mt: 2,
-                  }}
-                >
-                  <Typography variant="body2">
-                    Don't have an account?
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    onClick={() => navigate("/sign-up")}
-                    className="ml-2 cursor-pointer text-blue-500"
-                    sx={{ ml: 1, cursor: "pointer", color: "blue" }}
-                  >
-                    Register here
-                  </Typography>
-                </Box>
-              </Form>
-            )}
-          </Formik>
-        </Box>
-      </Paper>
-    </Container>
+                <Button type="submit" color="primary" disabled={isSubmitting}>
+                  Tasdiqlash
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
+    </div>
   );
 };
 

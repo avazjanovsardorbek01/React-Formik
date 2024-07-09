@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
-import { Order } from "@modal";
-import { EditOrder } from "@modal";
-import { OrderTable } from "@ui";
-import { order } from "@service";
+import { Service } from "@modal";
+import { ServiceTable } from "@ui";
+import { service } from "@service";
 import Pagination from "@mui/material/Pagination";
 
 const Index = () => {
@@ -11,18 +10,18 @@ const Index = () => {
   const [data, setData] = useState([]);
   const [count, setCount] = useState(0);
   const [params, setParams] = useState({
-    limit: 5,
+    limit: 10,
     page: 1,
   });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const getData = async () => {
+  const fetchData = async () => {
     try {
-      const response = await order.get(params);
-      if (response.status === 200 && response?.data?.orders_list) {
-        setData(response?.data?.orders_list);
+      const response = await service.get(params);
+      if (response.status === 200 && response?.data?.services) {
+        setData(response?.data?.services);
         let total = Math.ceil(response.data.total / params.limit);
         setCount(total);
       }
@@ -32,10 +31,10 @@ const Index = () => {
   };
 
   useEffect(() => {
-    getData();
+    fetchData();
   }, [params]);
 
-  const handleChange = (event, value) => {
+  const handleChangePage = (event, value) => {
     setParams({
       ...params,
       page: value,
@@ -44,8 +43,7 @@ const Index = () => {
 
   return (
     <>
-      <Order open={open} handleClose={handleClose} />
-      <EditOrder open={open} handleClose={handleClose} />
+      <Service open={open} handleClose={handleClose} setData={setData} />
       <div className="flex flex-col gap-4">
         <div className="flex justify-end">
           <Button
@@ -57,8 +55,12 @@ const Index = () => {
             Add
           </Button>
         </div>
-        <OrderTable data={data} setData={setData} />
-        <Pagination count={count} page={params.total} onChange={handleChange} />
+        <ServiceTable data={data} />
+        <Pagination
+          count={count}
+          page={params.page}
+          onChange={handleChangePage}
+        />
       </div>
     </>
   );

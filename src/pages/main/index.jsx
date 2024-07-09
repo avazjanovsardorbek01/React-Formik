@@ -1,18 +1,18 @@
-import { useNavigate } from "react-router-dom"
-import ResponsiveDrawer from "../../components/loyout"
-import { useEffect } from "react"
+import { useNavigate } from "react-router-dom";
+import ResponsiveDrawer from "../../components/layout";
+import { useEffect } from "react";
 const Main = () => {
-  const navigate = useNavigate()
-  useEffect(()=> {
+  const navigate = useNavigate();
+  useEffect(() => {
     if (!localStorage.getItem("access_token")) {
-      navigate("/sign-in")
+      navigate("/sign-in");
     }
-  },[])
+  }, []);
   return (
     <div>
-      <ResponsiveDrawer/>
+      <ResponsiveDrawer />
     </div>
-  )
-}
+  );
+};
 
-export default Main
+export default Main;
